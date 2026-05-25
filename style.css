@@ -1,0 +1,164 @@
+/* ============================================================
+   دار الفتح — Custom Styles
+   Tailwind CDN doesn't generate these; they must live here.
+   ============================================================ */
+
+/* ── Utilities ─────────────────────────────────────────── */
+
+.hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scroll::-webkit-scrollbar { display: none; }
+
+/* iOS home-indicator safe area for the bottom nav */
+.pb-safe { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+
+/* ── Header icon buttons ───────────────────────────────── */
+
+.header-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease, transform 0.15s ease;
+}
+.header-btn:hover {
+    background-color: #f3f4f6;
+    color: #1c3d8a;
+    transform: scale(1.08);
+}
+
+/* ── Page transitions ──────────────────────────────────── */
+
+.page-section.active {
+    animation: pageIn 0.22s ease-out;
+}
+@keyframes pageIn {
+    from { opacity: 0; transform: translateY(7px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Hero blob ─────────────────────────────────────────── */
+
+@keyframes blob {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%       { transform: translate(24px, -18px) scale(1.07); }
+    66%       { transform: translate(-18px, 22px) scale(0.94); }
+}
+.animate-blob        { animation: blob 9s ease-in-out infinite; }
+.animation-delay-2000 { animation-delay: 2s; }
+
+/* ── Toast notifications ───────────────────────────────── */
+
+.toast-enter {
+    position: absolute;
+    animation: toastIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.toast-leave {
+    position: absolute;
+    animation: toastOut 0.22s ease-in forwards;
+}
+@keyframes toastIn {
+    from { opacity: 0; transform: translate(-50%, -14px) scale(0.88); }
+    to   { opacity: 1; transform: translate(-50%, 0)    scale(1);    }
+}
+@keyframes toastOut {
+    from { opacity: 1; transform: translate(-50%, 0);    }
+    to   { opacity: 0; transform: translate(-50%, -8px); }
+}
+
+/* ── Cart icon shake ───────────────────────────────────── */
+
+@keyframes shake {
+    0%, 100% { transform: rotate(0deg);   }
+    20%       { transform: rotate(-13deg); }
+    40%       { transform: rotate(10deg);  }
+    60%       { transform: rotate(-6deg);  }
+    80%       { transform: rotate(4deg);   }
+}
+.animate-shake { animation: shake 0.42s ease-in-out; }
+
+/* ── Submenus hidden before JS initialises ─────────────── */
+
+.submenu { display: none; }
+
+/* ── Active thumbnail border ───────────────────────────── */
+
+.thumbnail-img.active { border-color: #1c3d8a !important; }
+
+/* ── Bottom-nav icon lift on hover ─────────────────────── */
+
+nav button { transition: color 0.2s ease; }
+nav button:hover .icon-3d {
+    transform: translateY(-4px) scale(1.14);
+    filter: drop-shadow(0px 5px 4px rgba(28, 61, 138, 0.36));
+}
+
+/* ── Smooth hardware-accelerated drawers / menus ───────── */
+
+#side-menu,
+#cart-drawer { will-change: transform; }
+
+/* ── Modal overlay fade ────────────────────────────────── */
+
+#product-modal,
+#search-modal,
+#image-viewer-modal,
+#video-modal {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+}
+#product-modal.modal-open,
+#search-modal.modal-open,
+#image-viewer-modal.modal-open,
+#video-modal.modal-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ── Book card modal — spring slide-up ─────────────────── */
+
+#product-modal > div {
+    transform: translateY(52px) scale(0.91);
+    opacity: 0;
+    transition:
+        transform 0.38s cubic-bezier(0.34, 1.45, 0.64, 1),
+        opacity   0.26s ease;
+}
+#product-modal.modal-open > div {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* ── Search modal — slide down from top ────────────────── */
+
+#search-modal > div {
+    transform: translateY(-24px) scale(0.96);
+    opacity: 0;
+    transition:
+        transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
+        opacity   0.22s ease;
+}
+#search-modal.modal-open > div {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* ── Image viewer — zoom in ────────────────────────────── */
+
+#image-viewer-modal img {
+    transform: scale(0.88);
+    opacity: 0;
+    transition:
+        transform 0.32s cubic-bezier(0.34, 1.4, 0.64, 1),
+        opacity   0.24s ease;
+}
+#image-viewer-modal.modal-open img {
+    transform: scale(1);
+    opacity: 1;
+}

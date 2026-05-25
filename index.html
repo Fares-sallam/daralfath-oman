@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="description" content="متجر دار الفتح للنشر والتوزيع عمان. رائدون في تقديم المناهج التعليمية والقصص التربوية لبناء جيل واعد.">
+    <meta name="keywords" content="دار الفتح, مناهج تعليمية, قصص أطفال, كتب مدرسية, حروفنا العربية, الفتح الرباني, عمان, مسقط">
+    
+    <meta property="og:title" content="متجر دار الفتح للنشر والتوزيع | عمان">
+    <meta property="og:description" content="تصفح أحدث الإصدارات والمناهج التعليمية والقصص التربوية من دار الفتح لتأسيس طفلك بشكل صحيح وممتع.">
+    <meta property="og:image" content="logo.png"> <meta property="og:url" content="https://darolfath.com">
+    <meta property="og:type" content="website">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="متجر دار الفتح للنشر والتوزيع | عمان">
+    <meta name="twitter:description" content="تصفح أحدث الإصدارات والمناهج التعليمية والقصص التربوية من دار الفتح.">
+    <meta name="twitter:image" content="logo.png">
+
+    <title>دار الفتح للنشر والتوزيع عمان</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { brand: { dark: '#1c3d8a', light: '#0072bc', gray: '#f3f4f6' } }, fontFamily: { sans: ['Tajawal', 'sans-serif'] } }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css?v=2">
+
+    <style>
+        /* لمعة الأزرار */
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+        /* تحميل وهمي أنيق للكتب */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        .skeleton {
+            background: #f6f7f8;
+            background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 100%; 
+            animation: shimmer 1.5s infinite linear;
+        }
+        /* تأثير بروز 3D للأيقونات */
+        .icon-3d {
+            transition: all 0.3s ease;
+            filter: drop-shadow(0px 3px 2px rgba(28,61,138,0.2));
+        }
+        .group-hover\:icon-3d:hover .icon-3d {
+            transform: translateY(-4px) scale(1.15);
+            filter: drop-shadow(0px 6px 4px rgba(28,61,138,0.4));
+        }
+        /* انيميشن التبويبات */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 relative">
+
+    <div class="bg-gradient-to-r from-brand-dark via-brand-light to-brand-dark text-white text-center py-2 px-4 text-xs md:text-sm font-bold flex justify-center items-center gap-2 relative z-50 shadow-md">
+        <i class="fas fa-gift text-yellow-300 animate-pulse text-lg"></i>
+        <span>عرض خاص: خصم 10% للطلبات فوق 20 ر.ع . 🚚</span>
+    </div>
+
+    <div id="toast-container" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-[100] w-full max-w-sm pointer-events-none px-4 relative"></div>
+
+    <button id="back-to-top" onclick="scrollToTop()" class="fixed bottom-24 right-6 w-12 h-12 bg-brand-light text-white rounded-full shadow-lg flex items-center justify-center text-xl z-30 transition-all duration-300 opacity-0 pointer-events-none translate-y-10 hover:bg-brand-dark">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <div id="search-modal" class="fixed inset-0 bg-brand-dark bg-opacity-80 z-50 hidden flex items-start justify-center pt-24 px-4 transition-opacity backdrop-blur-sm">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-3 flex gap-2 relative">
+            <button onclick="closeModal('search-modal')" class="absolute -top-4 -right-4 w-10 h-10 bg-white rounded-full shadow-lg text-gray-500 hover:text-red-500 text-lg"><i class="fas fa-times"></i></button>
+            <input type="text" id="search-input" oninput="liveSearch(this.value)" placeholder="ابحث عن السلاسل، الكتب، أو المؤلفين..." class="flex-grow p-4 bg-transparent border-none outline-none text-lg placeholder-gray-400">
+            <button onclick="performSearch()" class="bg-brand-dark hover:bg-brand-light text-white px-8 rounded-xl font-bold transition text-lg shadow-md"><i class="fas fa-search"></i></button>
+        </div>
+    </div>
+
+    <div id="image-viewer-modal" class="fixed inset-0 bg-black/95 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-md">
+        <button onclick="closeModal('image-viewer-modal')" class="absolute top-6 right-6 w-12 h-12 bg-white/10 rounded-full text-white hover:bg-white/20 hover:text-red-400 transition text-2xl flex items-center justify-center"><i class="fas fa-times"></i></button>
+        <img id="fullscreen-img" src="" class="max-w-full max-h-[90vh] object-contain drop-shadow-2xl rounded-lg">
+    </div>
+
+    <div id="video-modal" class="fixed inset-0 bg-black/95 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-md transition-opacity">
+        <button onclick="closeVideoModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-12 h-12 bg-white/10 rounded-full text-white hover:bg-white/20 hover:text-red-500 transition text-2xl flex items-center justify-center shadow-lg z-20"><i class="fas fa-times"></i></button>
+        <div class="w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl relative z-10 border border-white/10">
+            <iframe id="video-iframe" class="w-full h-full absolute inset-0 border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <header class="bg-white/80 backdrop-blur-xl shadow-sm py-2 px-4 sticky top-0 z-40 border-b border-white/40">
+        <div class="container mx-auto flex justify-between items-center relative min-h-[60px] md:min-h-[80px]">
+            
+            <div class="flex-1 flex justify-start z-10">
+                <button onclick="toggleMenu()" class="header-btn text-xl"><i class="fas fa-bars"></i></button>
+            </div>
+
+            <div class="absolute left-1/2 transform -translate-x-1/2 cursor-pointer hover:scale-105 transition z-20" onclick="navigateTo('home-page')">
+                <img src="logo.png" alt="دار الفتح" class="h-14 md:h-20 object-contain">
+            </div>
+
+            <div class="flex-1 flex justify-end items-center gap-2 z-10">
+                <a href="https://wa.me/96899383940" class="relative overflow-hidden group flex items-center gap-2 border border-green-200 bg-gradient-to-r from-green-50 to-white hover:from-green-100 hover:to-green-50 text-green-600 font-black w-auto px-3 py-2 md:px-4 md:py-2.5 rounded-full shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <span class="absolute top-0 left-[-100%] w-1/2 h-full bg-white/60 skew-x-[-20deg] group-hover:animate-[shine_0.6s_ease-in-out]"></span>
+                    <i class="fab fa-whatsapp text-xl md:text-2xl animate-pulse"></i>
+                    <span class="text-sm hidden lg:inline relative z-10">استفسار</span>
+                </a>
+
+                <button onclick="showWishlistPage()" class="relative overflow-hidden group flex items-center gap-2 border border-red-200 bg-gradient-to-r from-red-50 to-white hover:from-red-100 hover:to-red-50 text-red-500 font-black w-auto px-3 py-2 md:px-4 md:py-2.5 rounded-full shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <i class="fas fa-heart text-lg md:text-xl group-hover:scale-125 transition-transform duration-300"></i>
+                    <span class="text-sm hidden lg:inline relative z-10">أعجبك</span>
+                </button>
+                
+                <div class="w-1 md:w-2"></div>
+                <button onclick="openModal('search-modal')" class="header-btn text-lg md:text-xl bg-gray-50 border border-gray-200 hover:bg-gray-100"><i class="fas fa-search"></i></button>
+            </div>
+
+        </div>
+    </header>
+
+    <div id="menu-overlay" onclick="toggleMenu()" class="fixed inset-0 bg-black/60 z-40 hidden backdrop-blur-sm"></div>
+
+    <aside id="side-menu" class="fixed top-0 right-0 w-[85%] max-w-[380px] h-full bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-500 overflow-y-auto flex flex-col hide-scroll">
+        <div class="p-5 flex justify-between items-center border-b bg-brand-gray">
+            <h3 class="font-black text-xl text-brand-dark flex items-center gap-2"><i class="fas fa-layer-group text-brand-light"></i> أقسام الإصدارات</h3>
+            <button onclick="toggleMenu()" class="w-8 h-8 bg-white rounded-full shadow text-gray-500 hover:text-red-500"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="flex-grow p-4 text-gray-800 font-bold overflow-y-auto">
+            <a href="#" onclick="navigateTo('home-page'); toggleMenu();" class="block p-3 mb-3 rounded-lg hover:bg-blue-50 text-brand-dark"><i class="fas fa-home ml-2"></i> الصفحة الرئيسية</a>
+            <div class="border rounded-xl overflow-hidden mb-3 shadow-sm">
+                <button onclick="toggleSubmenu('submenu-1', this)" class="w-full p-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100 text-brand-dark font-black">
+                    <span><i class="fas fa-book-open ml-2 text-brand-light"></i> سلسلة الفتح الرباني</span>
+                    <i class="fas fa-chevron-down text-xs transition-transform"></i>
+                </button>
+                <div id="submenu-1" class="submenu p-2 bg-white space-y-1 text-sm font-bold border-t border-gray-100">
+                    <a href="#" onclick="showSeries('fath-magmoat', 'مجموعات تعليمية'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ مجموعات تعليمية</a>
+                    <a href="#" onclick="showSeries('fath-moalem', 'كتب المعلم'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ كتب المعلم</a>
+                    <a href="#" onclick="showSeries('fath-qeraa', 'كتب القراءة'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ كتب القراءة</a>
+                    <a href="#" onclick="showSeries('fath-tajweed', 'كتب التجويد'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ كتب التجويد</a>
+                    <div class="my-1 border-y border-gray-100 py-1">
+                        <button onclick="toggleSubmenu('submenu-1-1', this)" class="w-full p-2 flex justify-between items-center text-gray-800 hover:text-brand-dark rounded hover:bg-gray-50">
+                            <span>- كتب الكتابة</span><i class="fas fa-chevron-down text-xs transition-transform"></i>
+                        </button>
+                        <div id="submenu-1-1" class="submenu pl-2 pr-4 space-y-1 mt-1 border-r-2 border-brand-light bg-blue-50/50 rounded py-1">
+                            <a href="#" onclick="showSeries('qalam', 'سلسلة علم بالقلم'); toggleMenu();" class="block p-2 text-brand-dark font-black hover:text-brand-light hover:bg-blue-100 rounded">+ سلسلة علم بالقلم</a>
+                            <a href="#" onclick="showSeries('horof', 'سلسلة حروفنا العربية'); toggleMenu();" class="block p-2 text-brand-dark font-black hover:text-brand-light hover:bg-blue-100 rounded">+ سلسلة حروفنا العربية</a>
+                        </div>
+                    </div>
+                    <a href="#" onclick="showSeries('baraem', 'سلسلة براعم الفتح'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ سلسلة براعم الفتح</a>
+                    <a href="#" onclick="showSeries('english', 'منهج اللغة الإنجليزية'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ منهج اللغة الإنجليزية</a>
+                    <a href="#" onclick="showSeries('hesab', 'منهج الحساب'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ منهج الحساب</a>
+                    <a href="#" onclick="showSeries('hedia', 'سلسلة الهدية'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ سلسلة الهدية</a>
+                    <a href="#" onclick="showSeries('activities', 'الأنشطة التعليمية'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ الأنشطة التعليمية</a>
+                    <a href="#" onclick="showSeries('records', 'سجلات المتابعة'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ سجلات المتابعة</a>
+                    <a href="#" onclick="showSeries('summer-course', 'منهج الدورة الصيفية'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ منهج الدورة الصيفية</a>
+                </div>
+            </div>
+            <div class="border rounded-xl overflow-hidden mb-3 shadow-sm">
+                <button onclick="toggleSubmenu('submenu-2', this)" class="w-full p-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100 text-brand-dark font-black">
+                    <span><i class="fas fa-photo-video ml-2 text-brand-light"></i> قصص وموسوعات</span><i class="fas fa-chevron-down text-xs transition-transform"></i>
+                </button>
+                <div id="submenu-2" class="submenu p-2 bg-white space-y-1 text-sm font-bold border-t border-gray-100">
+                    <a href="#" onclick="showSeries('mawsoat', 'موسوعات تربوية'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ موسوعات تربوية</a>
+                    <a href="#" onclick="showSeries('qasas', 'قصص وحكايات'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ قصص وحكايات</a>
+                </div>
+            </div>
+            <a href="#" onclick="showSeries('wasaal', 'الوسائل التعليمية'); toggleMenu();" class="block p-3 mb-3 rounded-xl border bg-gray-50 hover:bg-gray-100 text-brand-dark font-black shadow-sm flex items-center">
+                <i class="fas fa-shapes ml-2 text-brand-light"></i> الوسائل التعليمية
+            </a>
+            <div class="border rounded-xl overflow-hidden mb-3 shadow-sm">
+                <button onclick="toggleSubmenu('submenu-4', this)" class="w-full p-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100 text-brand-dark font-black">
+                    <span><i class="fas fa-layer-group ml-2 text-brand-light"></i> إصدارات متنوعة</span><i class="fas fa-chevron-down text-xs transition-transform"></i>
+                </button>
+                <div id="submenu-4" class="submenu p-2 bg-white space-y-1 text-sm font-bold border-t border-gray-100">
+                    <div class="my-1 border-y border-gray-100 py-1">
+                        <button onclick="toggleSubmenu('submenu-4-1', this)" class="w-full p-2 flex justify-between items-center text-gray-800 hover:text-brand-dark rounded hover:bg-gray-50">
+                            <span>- سلسلة الكافي</span><i class="fas fa-chevron-down text-xs transition-transform"></i>
+                        </button>
+                        <div id="submenu-4-1" class="submenu pl-2 pr-4 space-y-1 mt-1 border-r-2 border-brand-light bg-blue-50/50 rounded py-1">
+                            <a href="#" onclick="showSeries('nahw-series', 'سلسلة النحو بين يديك'); toggleMenu();" class="block p-2 text-brand-dark font-black hover:text-brand-light hover:bg-blue-100 rounded">+ سلسلة النحو بين يديك</a>
+                            <a href="#" onclick="showSeries('imlaa-series', 'سلسلة الإملاء بين يديك'); toggleMenu();" class="block p-2 text-brand-dark font-black hover:text-brand-light hover:bg-blue-100 rounded">+ سلسلة الإملاء بين يديك</a>
+                        </div>
+                    </div>
+                    <a href="#" onclick="showSeries('color-learn', 'سلسلة لون وتعلم'); toggleMenu();" class="block p-2 rounded hover:text-brand-light hover:bg-blue-50">+ سلسلة لون وتعلم</a>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 bg-brand-dark text-white text-center mt-auto rounded-t-3xl shadow-[0_-5px_15px_rgba(0,0,0,0.1)]">
+            <p class="text-sm font-bold mb-4 opacity-90">نسعد بتواصلكم معنا</p>
+            <div class="flex justify-center gap-4 text-xl">
+                <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#25D366] transition"><i class="fab fa-whatsapp"></i></a>
+                <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#1877F2] transition"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#E4405F] transition"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <section class="mb-8 px-4">
+            <div id="smart-filters-container" class="flex gap-3 overflow-x-auto hide-scroll snap-x py-2" style="scroll-behavior: smooth;">
+            </div>
+        </section>
+        <section id="home-page" class="page-section active">
+            <div class="relative w-full py-16 md:py-24 bg-gradient-to-br from-blue-50 via-white to-blue-50 overflow-hidden flex items-center justify-center border-b border-gray-100" style="isolation:isolate">
+                <div class="absolute top-[-50px] right-[-50px] w-64 h-64 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+                <div class="absolute bottom-[-50px] left-[-50px] w-64 h-64 bg-brand-light rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+                
+                <div class="relative z-10 flex flex-col items-center text-center px-4 transform translate-y-4 animate-[fadeIn_1s_ease-out_forwards]">
+                    <img src="logo.png" alt="دار الفتح" class="h-32 md:h-48 object-contain mb-6 drop-shadow-xl hover:scale-105 transition-transform duration-500 mix-blend-multiply">
+                    <h1 class="text-3xl md:text-5xl font-black mb-3 text-brand-dark drop-shadow-sm">دار الفتح للنشر والتوزيع عمان</h1>
+                    <p class="text-lg md:text-xl font-medium text-gray-500 mb-8 max-w-lg">مؤسسة رائدة في تقديم المناهج التعليمية والقصص التربوية لبناء جيل واعد.</p>
+                    <button onclick="document.getElementById('home-books').scrollIntoView({behavior: 'smooth'})" class="bg-brand-dark text-white px-8 py-4 rounded-full font-bold text-lg shadow-[0_10px_25px_rgba(28,61,138,0.3)] hover:bg-brand-light transition-all transform hover:-translate-y-1">
+                        تصفح أحدث إصداراتنا <i class="fas fa-arrow-down mr-2"></i>
+                    </button>
+                    <div class="flex items-center gap-6 mt-8 text-gray-400 text-sm font-bold">
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-2xl font-black text-brand-dark">+90</span>
+                            <span>إصداراً</span>
+                        </div>
+                        <div class="w-px h-10 bg-gray-200"></div>
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-2xl font-black text-brand-dark">+30</span>
+                            <span>سلسلة</span>
+                        </div>
+                        <div class="w-px h-10 bg-gray-200"></div>
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-2xl font-black text-brand-dark">عُمان</span>
+                            <span>مسقط</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container mx-auto px-4 py-12 space-y-16">
+                
+                <section class="mb-16 mt-8 px-4">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-2xl md:text-3xl font-black text-brand-dark relative inline-block">
+                            الأكثر مبيعاً
+                            <span class="absolute -bottom-2 right-0 w-1/2 h-1.5 bg-brand-light rounded-full"></span>
+                        </h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 bg-white rounded-[30px] border-2 border-blue-100 shadow-sm hover:shadow-xl hover:border-brand-light/40 transition-all duration-500 overflow-hidden group cursor-pointer flex flex-col sm:flex-row relative" onclick="document.getElementById('search-input').value = 'فتح الرحمن'; performSearch();">
+                            
+                            <div class="sm:w-2/5 bg-gray-50 flex justify-center items-center p-6 relative">
+                                <span class="absolute top-4 right-6 bg-brand-dark text-white text-xs font-bold px-3 py-1 rounded-full z-10 shadow-md">رقم #1</span>
+                                <img src="https://res.cloudinary.com/dszutjsi8/image/upload/v1775051631/fathelrahman_n5hqpz.jpg" class="h-48 md:h-64 object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-500 relative z-10">
+                            </div>
+                            <div class="sm:w-3/5 p-6 md:p-8 flex flex-col justify-center">
+                                <h3 class="text-2xl font-black text-brand-dark mb-2">كتاب فتح الرحمن</h3>
+                                <p class="text-gray-500 text-sm mb-4 leading-relaxed">الكتاب الأقوى والأكثر طلباً لتأسيس الأطفال في القراءة بالقرآن الكريم بطريقة سهلة ومبتكرة ومجربة.</p>
+                                <div class="flex items-center gap-1 text-yellow-400 text-sm mb-6">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    <span class="text-gray-400 text-xs mr-2 font-bold">(الأكثر طلباً)</span>
+                                </div>
+                                <div class="mt-auto inline-flex items-center gap-2 text-brand-light font-bold group-hover:gap-4 transition-all">
+                                    تصفح الكتاب <i class="fas fa-arrow-left"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-6">
+                            <div class="bg-white rounded-[20px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 p-4 flex gap-4 items-center group cursor-pointer" onclick="document.getElementById('search-input').value = 'علم بالقلم'; performSearch();">
+                                <div class="w-1/3 bg-gray-50 rounded-xl p-2 flex justify-center">
+                                    <img src="https://res.cloudinary.com/dszutjsi8/image/upload/v1775048898/all_qalam_wlxzak.jpg" class="h-24 object-contain drop-shadow-md group-hover:scale-105 transition-transform">
+                                </div>
+                                <div class="w-2/3">
+                                    <h4 class="font-black text-brand-dark text-md mb-1">سلسلة علم بالقلم</h4>
+                                    <p class="text-gray-400 text-xs mb-2 line-clamp-2">أفضل سلسلة لتدريب الطفل على مسك القلم والكتابة.</p>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-[20px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 p-4 flex gap-4 items-center group cursor-pointer" onclick="document.getElementById('search-input').value = 'النحو'; performSearch();">
+                                <div class="w-1/3 bg-gray-50 rounded-xl p-2 flex justify-center">
+                                    <img src="https://res.cloudinary.com/dszutjsi8/image/upload/v1775047319/nahw_all_uj2f0b.jpg" class="h-24 object-contain drop-shadow-md group-hover:scale-105 transition-transform">
+                                </div>
+                                <div class="w-2/3">
+                                    <h4 class="font-black text-brand-dark text-md mb-1">النحو بين يديك</h4>
+                                    <p class="text-gray-400 text-xs mb-2 line-clamp-2">طريقة مبتكرة لفهم قواعد النحو بسهولة وتشويق.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-16 mt-8 px-4 overflow-hidden relative">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-2xl md:text-3xl font-black text-brand-dark relative inline-block">
+                            سلسلة الفتح الرباني
+                            <span class="absolute -bottom-2 right-0 w-3/4 h-1.5 bg-brand-light rounded-full"></span>
+                        </h2>
+                        <span class="text-xs md:text-sm font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-100 flex items-center gap-1">يسار للتصفح <i class="fas fa-arrows-alt-h"></i></span>
+                    </div>
+
+                    <div id="fath-rabbani-slider" class="flex gap-3 md:gap-5 overflow-x-auto hide-scroll snap-x pb-6 pt-2 px-1" style="scroll-behavior: smooth;">
+                        <div class="w-[170px] md:w-[220px] shrink-0 bg-white rounded-3xl p-3 border border-gray-100 shadow-sm"><div class="skeleton w-full h-40 md:h-48 rounded-2xl mb-3"></div><div class="skeleton w-3/4 h-4 rounded mb-2"></div><div class="skeleton w-1/2 h-3 rounded"></div></div>
+                        <div class="w-[170px] md:w-[220px] shrink-0 bg-white rounded-3xl p-3 border border-gray-100 shadow-sm"><div class="skeleton w-full h-40 md:h-48 rounded-2xl mb-3"></div><div class="skeleton w-3/4 h-4 rounded mb-2"></div><div class="skeleton w-1/2 h-3 rounded"></div></div>
+                        <div class="w-[170px] md:w-[220px] shrink-0 bg-white rounded-3xl p-3 border border-gray-100 shadow-sm"><div class="skeleton w-full h-40 md:h-48 rounded-2xl mb-3"></div><div class="skeleton w-3/4 h-4 rounded mb-2"></div><div class="skeleton w-1/2 h-3 rounded"></div></div>
+                    </div>
+                </section>
+
+                <section id="home-books">
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6" id="all-products-grid">
+                        <div class="bg-white rounded-3xl p-3 border border-gray-100 shadow-sm"><div class="skeleton w-full h-40 md:h-56 rounded-2xl mb-3"></div><div class="skeleton w-3/4 h-4 rounded mb-2"></div><div class="skeleton w-1/2 h-3 rounded"></div></div>
+                        <div class="bg-white rounded-3xl p-3 border border-gray-100 shadow-sm"><div class="skeleton w-full h-40 md:h-56 rounded-2xl mb-3"></div><div class="skeleton w-3/4 h-4 rounded mb-2"></div><div class="skeleton w-1/2 h-3 rounded"></div></div>
+                        <div class="bg-white rounded-3xl p-3 border border-gray-100 shadow-sm hidden md:block"><div class="skeleton w-full h-40 md:h-56 rounded-2xl mb-3"></div><div class="skeleton w-3/4 h-4 rounded mb-2"></div><div class="skeleton w-1/2 h-3 rounded"></div></div>
+                        <div class="bg-white rounded-3xl p-3 border border-gray-100 shadow-sm hidden md:block"><div class="skeleton w-full h-40 md:h-56 rounded-2xl mb-3"></div><div class="skeleton w-3/4 h-4 rounded mb-2"></div><div class="skeleton w-1/2 h-3 rounded"></div></div>
+                        <div class="bg-white rounded-3xl p-3 border border-gray-100 shadow-sm hidden lg:block"><div class="skeleton w-full h-40 md:h-56 rounded-2xl mb-3"></div><div class="skeleton w-3/4 h-4 rounded mb-2"></div><div class="skeleton w-1/2 h-3 rounded"></div></div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <section id="series-page" class="page-section container mx-auto px-4 py-8 min-h-[60vh]">
+            <div class="flex justify-between items-center mb-8 border-b-2 border-brand-gray pb-4">
+                <h2 id="series-title" class="text-2xl md:text-3xl font-black text-brand-dark flex items-center gap-3">
+                    <i class="fas fa-bookmark text-brand-light"></i> <span id="series-title-text">اسم السلسلة</span>
+                </h2>
+                <button onclick="navigateTo('home-page')" class="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-50 hover:text-brand-dark transition font-bold flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-arrow-right"></i> عودة
+                </button>
+            </div>
+            <div id="series-empty-msg" class="hidden text-center py-12 text-gray-500 font-bold bg-white rounded-2xl border border-dashed border-gray-300">
+                <i class="fas fa-box-open text-5xl mb-4 text-gray-300"></i><br>لا توجد كتب مضافة في هذا القسم حالياً.<br>
+                <span class="text-sm font-normal text-gray-400 mt-2 block">سيتم إضافة الإصدارات قريباً.</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6" id="series-products-grid"></div>
+        </section>
+
+        <section id="wishlist-page" class="page-section container mx-auto px-4 py-8 min-h-[60vh]">
+            <div class="flex justify-between items-center mb-8 border-b-2 border-brand-gray pb-4">
+                <h2 class="text-2xl md:text-3xl font-black text-brand-dark flex items-center gap-3">
+                    <i class="fas fa-heart text-red-500"></i> قائمة الإعجابات ❤️
+                </h2>
+                <button onclick="navigateTo('home-page')" class="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-50 hover:text-brand-dark transition font-bold flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-arrow-right"></i> عودة
+                </button>
+            </div>
+            <div id="wishlist-empty-msg" class="hidden text-center py-12 text-gray-500 font-bold bg-white rounded-2xl border border-dashed border-gray-300">
+                <i class="fas fa-heart-broken text-5xl mb-4 text-gray-300"></i><br>قائمة الإعجابات فارغة حالياً.<br>
+                <span class="text-sm font-normal text-gray-400 mt-2 block">قم بالضغط على علامة القلب 🤍 في أي كتاب لإضافته هنا.</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6" id="wishlist-products-grid"></div>
+        </section>
+
+        <section id="contact-page" class="page-section container mx-auto px-4 py-12">
+            <h2 class="text-3xl font-black text-brand-dark text-center mb-10">تواصل معنا</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                    <div class="mb-8">
+                        <div class="w-12 h-12 bg-blue-50 text-brand-light rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-envelope"></i></div>
+                        <p class="text-xs text-gray-400 font-bold mb-1">البريد الإلكتروني</p>
+                        <p class="font-bold text-brand-dark">daralfathomam@gmail.com</p>
+                    </div>
+                    <div class="mb-8">
+                        <div class="w-12 h-12 bg-blue-50 text-brand-light rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-phone-alt"></i></div>
+                        <p class="text-xs text-gray-400 font-bold mb-1">رقم الهاتف</p>
+                        <p class="font-bold text-brand-dark" dir="ltr">+968 9938 3940</p>
+                    </div>
+                    <div class="mb-8">
+                        <div class="w-12 h-12 bg-blue-50 text-brand-light rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-map-marker-alt"></i></div>
+                        <p class="text-xs text-gray-400 font-bold mb-1">العنوان</p>
+                        <p class="font-bold text-brand-dark text-sm">مسقط - عمان</p>
+                    </div>
+                    <div class="w-full border-t pt-6 mt-auto">
+                        <p class="text-sm font-bold text-gray-500 mb-4">تابعنا عبر</p>
+                        <div class="flex justify-center flex-wrap gap-4 text-xl">
+                            <a href="https://wa.me/96899383940" class="text-[#25D366] hover:scale-110 transition"><i class="fab fa-whatsapp"></i></a>
+                            <a href="https://www.facebook.com/profile.php?id=61577556336476" class="text-[#1877F2] hover:scale-110 transition"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://www.instagram.com/daralfathoman?igsh=MWtvcnR6dmczdm9jOA==" class="text-[#E4405F] hover:scale-110 transition"><i class="fab fa-instagram"></i></a>
+                            <a href="https://www.tiktok.com/@user2182507320199" class="text-black hover:scale-110 transition"><i class="fab fa-tiktok"></i></a>
+                            <a href="https://www.youtube.com/@darolfath" class="text-[#FF0000] hover:scale-110 transition"><i class="fab fa-youtube"></i></a>
+                            <a href="mailto:store@darolfath.com" class="text-gray-800 hover:scale-110 transition"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:col-span-2 bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-100">
+                    <p class="text-gray-500 font-medium mb-8">يمكنك إرسال أسئلتك واستفساراتك عن طريق ملء النموذج التالي.</p>
+                    <form class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div><label class="block text-sm font-bold mb-2">الاسم</label><input type="text" placeholder="الاسم ثلاثي" class="w-full p-4 bg-gray-50 border rounded-xl outline-none focus:border-brand-light"></div>
+                            <div><label class="block text-sm font-bold mb-2">البريد الإلكتروني</label><input type="email" placeholder="البريد" class="w-full p-4 bg-gray-50 border rounded-xl outline-none focus:border-brand-light"></div>
+                        </div>
+                        <div><label class="block text-sm font-bold mb-2">رقم الهاتف</label><input type="tel" placeholder="رقم الهاتف" class="w-full p-4 bg-gray-50 border rounded-xl outline-none focus:border-brand-light"></div>
+                        <div><label class="block text-sm font-bold mb-2">نص الرسالة</label><textarea placeholder="اكتب رسالتك..." class="w-full p-4 bg-gray-50 border rounded-xl outline-none focus:border-brand-light" rows="4"></textarea></div>
+                        <button type="button" class="bg-brand-dark text-white px-10 py-4 rounded-xl font-bold hover:bg-brand-light shadow-lg">إرسال الرسالة</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="terms-page" class="page-section container mx-auto px-4 py-8 min-h-[60vh]">
+            <div class="flex justify-between items-center mb-8 border-b-2 border-brand-gray pb-4">
+                <h2 class="text-2xl md:text-3xl font-black text-brand-dark flex items-center gap-3">
+                    <i class="fas fa-file-contract text-brand-light"></i> الشروط والأحكام
+                </h2>
+                <button onclick="navigateTo('home-page')" class="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-50 hover:text-brand-dark transition font-bold flex items-center gap-2">
+                    <i class="fas fa-arrow-right"></i> عودة
+                </button>
+            </div>
+            <div class="bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-gray-100 text-gray-700 leading-relaxed space-y-6">
+                <h3 class="text-xl font-bold text-brand-dark">مقدمة</h3>
+                <p>مرحباً بكم في متجر دار الفتح للنشر والتوزيع عمان. باستخدامك لهذا الموقع وإتمامك لأي عملية شراء، فإنك توافق على الشروط والأحكام الموضحة أدناه.</p>
+                <h3 class="text-xl font-bold text-brand-dark">1. سياسة الخصومات</h3>
+                <ul class="list-disc pr-6 space-y-2">
+                    <li>يتم تطبيق خصم 10% تلقائياً عندما تصل قيمة المشتريات إلى 20 ريال عماني أو أكثر.</li>
+                    <li>يمكن استخدام أكواد الخصم الترويجية (مثل الكوبونات) للحصول على نسبة خصم أكبر (لا يمكن دمج أكثر من عرض).</li>
+                </ul>
+                <h3 class="text-xl font-bold text-brand-dark">2. آلية الطلب والتوصيل</h3>
+                <p>يتم تحويل الطلبات من خلال الموقع إلى تطبيق الواتساب الخاص بالدار ليتم تأكيدها من قبل فريق خدمة العملاء وترتيب إجراءات الدفع والتوصيل.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- ══ فيديوهات تعريفية ══ -->
+    <section id="intro-videos" class="bg-gradient-to-b from-blue-50/60 to-white border-t border-blue-100 py-14 px-4 mt-8">
+        <div class="container mx-auto">
+            <div class="flex justify-start mb-8">
+                <h2 class="text-xl md:text-3xl font-black text-brand-dark relative inline-block">
+                    فيديوهات تعريفية للسلاسل
+                    <span class="absolute -bottom-2 right-0 w-full h-1.5 bg-brand-light rounded-full"></span>
+                </h2>
+            </div>
+
+            <div class="flex gap-5 overflow-x-auto hide-scroll snap-x pb-6 pt-2 px-1" style="scroll-behavior: smooth;">
+
+                <div onclick="openVideo('https://www.youtube.com/embed/CP8pVxi9fRY')" class="w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] shrink-0 snap-start bg-[#b3c5e5] rounded-[28px] overflow-hidden shadow-sm cursor-pointer group hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                    <div class="relative h-40 md:h-48 overflow-hidden w-full">
+                        <img src="https://i.ytimg.com/vi/CP8pVxi9fRY/maxresdefault.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition">
+                            <div class="w-14 h-14 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-4 px-4 text-center h-20 flex items-center justify-center">
+                        <h3 class="font-black text-brand-dark text-sm md:text-base line-clamp-2">تعرف على سلسلة علم بالقلم لتأسيس الأطفال</h3>
+                    </div>
+                </div>
+
+                <div onclick="openVideo('https://www.youtube.com/embed/ekWbk9lOy34')" class="w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] shrink-0 snap-start bg-[#b3c5e5] rounded-[28px] overflow-hidden shadow-sm cursor-pointer group hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                    <div class="relative h-40 md:h-48 overflow-hidden w-full">
+                        <img src="https://i.ytimg.com/vi/ekWbk9lOy34/maxresdefault.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition">
+                            <div class="w-14 h-14 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-4 px-4 text-center h-20 flex items-center justify-center">
+                        <h3 class="font-black text-brand-dark text-sm md:text-base line-clamp-2">رحلة تعلم مميزة مع سلسلة النحو بين يديك!</h3>
+                    </div>
+                </div>
+
+                <div onclick="openVideo('https://www.youtube.com/embed/AN_avfGicq0')" class="w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] shrink-0 snap-start bg-[#b3c5e5] rounded-[28px] overflow-hidden shadow-sm cursor-pointer group hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                    <div class="relative h-40 md:h-48 overflow-hidden w-full">
+                        <img src="https://i.ytimg.com/vi/AN_avfGicq0/maxresdefault.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition">
+                            <div class="w-14 h-14 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-4 px-4 text-center h-20 flex items-center justify-center">
+                        <h3 class="font-black text-brand-dark text-sm md:text-base line-clamp-2">ودعاً لصعوبة النحو! الحل في سلسلة النحو بين يديك</h3>
+                    </div>
+                </div>
+
+                <div onclick="openVideo('https://www.youtube.com/embed/TRhVXjoi_HM')" class="w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] shrink-0 snap-start bg-[#b3c5e5] rounded-[28px] overflow-hidden shadow-sm cursor-pointer group hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                    <div class="relative h-40 md:h-48 overflow-hidden w-full">
+                        <img src="https://i.ytimg.com/vi/TRhVXjoi_HM/maxresdefault.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition">
+                            <div class="w-14 h-14 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-4 px-4 text-center h-20 flex items-center justify-center">
+                        <h3 class="font-black text-brand-dark text-sm md:text-base line-clamp-2">تعليم القراءة وتجويد القرآن مع سلسلة الفتح الرباني</h3>
+                    </div>
+                </div>
+
+                <div onclick="openVideo('https://www.youtube.com/embed/TMM4R4zRvjA')" class="w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] shrink-0 snap-start bg-[#b3c5e5] rounded-[28px] overflow-hidden shadow-sm cursor-pointer group hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                    <div class="relative h-40 md:h-48 overflow-hidden w-full">
+                        <img src="https://i.ytimg.com/vi/TMM4R4zRvjA/maxresdefault.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition">
+                            <div class="w-14 h-14 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-4 px-4 text-center h-20 flex items-center justify-center">
+                        <h3 class="font-black text-brand-dark text-sm md:text-base line-clamp-2">سلسلة فتح الوهاب في تعليم الحساب</h3>
+                    </div>
+                </div>
+
+                <div onclick="openVideo('https://www.youtube.com/embed/Sno68-VY_Mc')" class="w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] shrink-0 snap-start bg-[#b3c5e5] rounded-[28px] overflow-hidden shadow-sm cursor-pointer group hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                    <div class="relative h-40 md:h-48 overflow-hidden w-full">
+                        <img src="https://i.ytimg.com/vi/Sno68-VY_Mc/maxresdefault.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition">
+                            <div class="w-14 h-14 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-4 px-4 text-center h-20 flex items-center justify-center">
+                        <h3 class="font-black text-brand-dark text-sm md:text-base line-clamp-2">سلسلة الهدية في الآداب والأخلاق الإسلامية</h3>
+                    </div>
+                </div>
+
+                <div onclick="openVideo('https://www.youtube.com/embed/fWDlpw1WadM')" class="w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] shrink-0 snap-start bg-[#b3c5e5] rounded-[28px] overflow-hidden shadow-sm cursor-pointer group hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                    <div class="relative h-40 md:h-48 overflow-hidden w-full">
+                        <img src="https://i.ytimg.com/vi/fWDlpw1WadM/maxresdefault.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition">
+                            <div class="w-14 h-14 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-4 px-4 text-center h-20 flex items-center justify-center">
+                        <h3 class="font-black text-brand-dark text-sm md:text-base line-clamp-2">سلسلة الفتح الرباني في اللغة الإنجليزية</h3>
+                    </div>
+                </div>
+
+                <div onclick="openVideo('https://www.youtube.com/embed/5nzfKlRcxd4')" class="w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] shrink-0 snap-start bg-[#b3c5e5] rounded-[28px] overflow-hidden shadow-sm cursor-pointer group hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+                    <div class="relative h-40 md:h-48 overflow-hidden w-full">
+                        <img src="https://i.ytimg.com/vi/5nzfKlRcxd4/maxresdefault.jpg" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/25 transition">
+                            <div class="w-14 h-14 bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="py-4 px-4 text-center h-20 flex items-center justify-center">
+                        <h3 class="font-black text-brand-dark text-sm md:text-base line-clamp-2">سلسلة الفتح الرباني</h3>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gradient-to-b from-white to-blue-50/40 border-t border-gray-200 pt-12 pb-28 mt-0 shadow-[0_-10px_30px_rgba(0,0,0,0.02)]">
+        <div class="container mx-auto px-4 flex flex-col items-center text-center">
+            <img src="logo.png" alt="دار الفتح" class="h-28 md:h-36 mb-6 object-contain">
+            <p class="text-gray-500 text-sm md:text-base font-medium mb-6 max-w-md">نسعى دائماً لتقديم أفضل السلاسل التعليمية والقصص التربوية التي تساعد في تنشئة جيل واعد، معتمدين على أحدث الأساليب.</p>
+            <div class="flex justify-center items-center gap-2 text-brand-dark mb-8 font-black text-lg bg-blue-50 px-6 py-2 rounded-full border border-blue-100">
+                <i class="fas fa-map-marker-alt text-red-500"></i> موقعنا: مسقط، سلطنة عمان
+            </div>
+            <div class="flex justify-center flex-wrap gap-5 text-2xl mb-8">
+                <a href="https://wa.me/96899383940" class="w-12 h-12 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:scale-110 shadow-lg transition"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=61577556336476" class="w-12 h-12 rounded-full bg-[#1877F2] text-white flex items-center justify-center hover:scale-110 shadow-lg transition"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/daralfathoman?igsh=MWtvcnR6dmczdm9jOA==" class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] text-white flex items-center justify-center hover:scale-110 shadow-lg transition"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@user2182507320199" class="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center hover:scale-110 shadow-lg transition"><i class="fab fa-tiktok"></i></a>
+                <a href="https://www.youtube.com/@darolfath" class="w-12 h-12 rounded-full bg-[#FF0000] text-white flex items-center justify-center hover:scale-110 shadow-lg transition"><i class="fab fa-youtube"></i></a>
+                <a href="mailto:store@darolfath.com" class="w-12 h-12 rounded-full bg-gray-800 text-white flex items-center justify-center hover:scale-110 shadow-lg transition"><i class="fas fa-envelope"></i></a>
+            </div>
+            <div class="w-full border-t border-gray-100 pt-6">
+                <p class="text-xs text-gray-400 font-bold">جميع الحقوق محفوظة © لدار الفتح للنشر والتوزيع 2026</p>
+            </div>
+        </div>
+    </footer>
+
+    <nav class="fixed bottom-0 w-full bg-white/75 backdrop-blur-xl shadow-[0_-10px_30px_rgba(0,0,0,0.1)] border-t border-white/40 z-40 flex justify-around py-3 pb-safe">
+        <button onclick="navigateTo('home-page')" class="group-hover:icon-3d flex flex-col items-center text-gray-500 hover:text-brand-light transition w-1/5 group">
+            <i class="fas fa-home text-xl mb-1 icon-3d"></i><span class="text-[10px] md:text-[11px] font-bold">الرئيسية</span>
+        </button>
+        <button onclick="document.getElementById('home-books').scrollIntoView({behavior: 'smooth'}); navigateTo('home-page');" class="group-hover:icon-3d flex flex-col items-center text-gray-500 hover:text-brand-light transition w-1/5 group">
+            <i class="fas fa-store text-xl mb-1 icon-3d"></i><span class="text-[10px] md:text-[11px] font-bold">المتجر</span>
+        </button>
+        <button onclick="openCart()" class="flex flex-col items-center text-brand-dark transition w-1/5 group relative -top-4">
+            <div class="w-14 h-14 bg-brand-dark text-white rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(28,61,138,0.4)] group-hover:bg-brand-light group-hover:-translate-y-1 transition-all border-4 border-white relative z-10">
+                <i id="cart-btn-icon" class="fas fa-shopping-cart text-xl icon-3d"></i>
+                <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[12px] font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white shadow-sm transform group-hover:scale-110 transition">0</span>
+            </div>
+            <span class="text-[10px] md:text-[11px] font-black mt-1 text-brand-dark">السلة</span>
+        </button>
+        <button onclick="navigateTo('contact-page')" class="group-hover:icon-3d flex flex-col items-center text-gray-500 hover:text-brand-light transition w-1/5 group">
+            <i class="fas fa-envelope text-xl mb-1 icon-3d"></i><span class="text-[10px] md:text-[11px] font-bold">تواصل</span>
+        </button>
+        <button onclick="navigateTo('terms-page')" class="group-hover:icon-3d flex flex-col items-center text-gray-500 hover:text-brand-light transition w-1/5 group">
+            <i class="fas fa-file-contract text-xl mb-1 icon-3d"></i><span class="text-[10px] md:text-[11px] font-bold">الشروط</span>
+        </button>
+    </nav>
+
+    <div id="product-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto relative shadow-2xl transform transition-transform hide-scroll flex flex-col">
+            
+            <div class="absolute top-4 w-full px-4 flex justify-between items-center z-20">
+                <button onclick="closeProductModal()" class="w-10 h-10 bg-white/90 backdrop-blur text-gray-800 rounded-full flex items-center justify-center hover:bg-gray-200 shadow"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="shareProduct()" class="w-10 h-10 bg-white/90 backdrop-blur text-green-600 rounded-full flex items-center justify-center hover:bg-green-50 shadow"><i class="fas fa-share-alt text-lg"></i></button>
+            </div>
+
+            <div class="bg-gradient-to-b from-blue-50 to-white pt-16 pb-4 flex flex-col items-center border-b border-gray-100 relative shrink-0">
+                <div class="absolute inset-0 flex justify-center items-center opacity-10 pointer-events-none"><i class="fas fa-book-open text-9xl"></i></div>
+                <img id="modal-img" src="" class="h-48 md:h-56 object-contain drop-shadow-2xl relative z-10 rounded cursor-zoom-in" onclick="openFullscreenImage()">
+                <div id="modal-thumbnails" class="flex gap-2 mt-4 overflow-x-auto p-2 w-full justify-center relative z-10 hide-scroll"></div>
+            </div>
+            
+            <div class="p-6 text-center bg-white flex flex-col shrink-0">
+                <p id="modal-series" class="text-xs font-bold text-brand-light mb-2"></p>
+                <h3 id="modal-title" class="text-xl font-black mb-2 text-brand-dark leading-tight"></h3>
+                <div class="text-yellow-400 text-sm mb-4">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                
+                <div id="modal-versions-container" class="flex gap-3 justify-center mb-5 hidden flex-wrap"></div>
+
+                <div class="bg-gray-50 p-4 rounded-xl mb-6 text-right border border-gray-100">
+                    <h4 class="text-sm font-bold text-brand-dark mb-2"><i class="fas fa-info-circle ml-1"></i> تفاصيل الكتاب:</h4>
+                    <p id="modal-desc" class="text-gray-600 text-sm leading-relaxed"></p>
+                </div>
+                <p id="modal-price" class="text-3xl font-black text-brand-light mb-6"></p>
+                <div id="modal-action-container" class="w-full"></div>
+            </div>
+
+            <div id="modal-related-section" class="bg-gray-50 border-t border-gray-100 p-5 mt-auto hidden shrink-0">
+                <h4 class="text-sm font-bold text-gray-800 mb-4"><i class="fas fa-layer-group text-brand-light ml-1"></i> قد يعجبك أيضاً من نفس السلسلة:</h4>
+                <div id="modal-related-books" class="flex gap-3 overflow-x-auto hide-scroll snap-x"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cart-drawer-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity duration-300 opacity-0" onclick="closeCartModal()"></div>
+
+    <div id="cart-drawer" class="fixed top-0 left-0 w-full md:w-[420px] h-full bg-gray-50 z-[60] flex flex-col transition-transform duration-300 transform -translate-x-full shadow-2xl">
+        
+        <div class="bg-white p-5 border-b border-gray-100 flex justify-between items-center shrink-0">
+            <h2 class="text-2xl font-black text-brand-dark flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-50 text-brand-light rounded-full flex items-center justify-center"><i class="fas fa-shopping-basket"></i></div> سلة المشتريات
+            </h2>
+            <button onclick="closeCartModal()" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 text-gray-600 transition"><i class="fas fa-times text-xl"></i></button>
+        </div>
+
+        <div class="flex-grow overflow-y-auto hide-scroll flex flex-col">
+            <div id="cart-promo-banner" class="p-4 shrink-0"></div>
+            <div id="cart-items" class="px-4 pb-4 space-y-3 flex-grow">
+                </div>
+        </div>
+
+        <div class="bg-white p-5 border-t border-gray-100 shadow-[0_-10px_20px_rgba(0,0,0,0.03)] shrink-0 rounded-t-3xl md:rounded-none">
+            
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="coupon-input" placeholder="هل لديك كود خصم؟" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-light transition uppercase font-bold text-brand-dark">
+                <button onclick="applyCoupon()" class="bg-brand-dark text-white px-5 py-3 rounded-xl text-sm font-bold hover:bg-brand-light transition shrink-0 shadow-sm">تطبيق</button>
+            </div>
+
+            <div id="cart-summary-container" class="mb-4"></div>
+            
+            <div class="border-t border-gray-100 pt-4">
+                <div class="flex border-b border-gray-200 mb-4">
+                    <button id="tab-individual" onclick="switchCheckoutTab('individual')" class="w-1/2 py-2 text-sm font-black border-b-2 border-brand-dark text-brand-dark transition">طلب أفراد</button>
+                    <button id="tab-schools" onclick="switchCheckoutTab('schools')" class="w-1/2 py-2 text-sm font-bold border-b-2 border-transparent text-gray-400 hover:text-brand-dark transition">طلب مدارس (جملة)</button>
+                </div>
+
+                <div id="form-individual" class="space-y-3 animate-[fadeIn_0.3s_ease-out]">
+                    <h3 class="font-bold text-sm text-brand-dark mb-1 flex items-center gap-2"><i class="fas fa-truck text-brand-light"></i> بيانات التوصيل السريع</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="cust-name" placeholder="الاسم ثلاثي" class="w-1/2 p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-light transition">
+                        <input type="tel" id="cust-phone" placeholder="رقم الهاتف" class="w-1/2 p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-light transition">
+                    </div>
+                    <textarea id="cust-address" placeholder="العنوان بالتفصيل" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-light transition" rows="1"></textarea>
+                    <button onclick="triggerConfettiAndCheckout()" class="w-full bg-[#25D366] text-white mt-2 py-4 rounded-xl font-bold hover:bg-[#128C7E] transition shadow-[0_5px_15px_rgba(37,211,102,0.3)] flex items-center justify-center gap-2 text-lg transform hover:-translate-y-1">
+                        <i class="fab fa-whatsapp text-2xl"></i> إرسال الطلب عبر واتساب
+                    </button>
+                </div>
+
+                <div id="form-schools" class="space-y-3 hidden animate-[fadeIn_0.3s_ease-out]">
+                    <div class="bg-gradient-to-r from-blue-50 to-white border border-blue-200 rounded-xl p-3 text-sm text-brand-dark mb-3 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-brand-light"></div>
+                        <span class="font-black block mb-1 text-base text-brand-light"><i class="fas fa-handshake mr-1"></i> مرحباً بشركاء النجاح!</span>
+                        <p class="leading-relaxed font-medium">نسعد بتوفير إصداراتنا للمدارس والمراكز بأسعار الجملة. أرسل طلبك وسنتواصل معك لتقديم أفضل عرض سعر، <span class="font-bold text-red-500">والتفاوض متاح ومرحب به</span> للوصول لما يرضيكم.</p>
+                    </div>
+                    
+                    <input type="text" id="school-name" placeholder="اسم المدرسة أو المركز" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-light transition">
+                    <input type="text" id="school-series" placeholder="السلاسل المطلوبة والعدد التقريبي (مثال: 50 فتح الرحمن)" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-light transition">
+                    <textarea id="school-notes" placeholder="ملاحظات إضافية (اختياري)" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:border-brand-light transition" rows="2"></textarea>
+                    
+                    <button onclick="checkoutSchoolsWhatsApp()" class="w-full bg-brand-dark text-white mt-2 py-4 rounded-xl font-bold hover:bg-brand-light transition shadow-[0_5px_15px_rgba(28,61,138,0.3)] flex items-center justify-center gap-2 text-lg transform hover:-translate-y-1">
+                        <i class="fas fa-paper-plane text-xl"></i> إرسال طلب الجملة
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function triggerConfettiAndCheckout() {
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#1c3d8a', '#0072bc', '#25D366', '#ffffff'],
+                zIndex: 9999
+            });
+            setTimeout(() => {
+                if(typeof checkoutWhatsApp === 'function') checkoutWhatsApp();
+            }, 1000);
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="app.js?v=3"></script>
+    <div id="pwa-install-prompt" class="fixed bottom-24 left-4 right-4 md:left-auto md:right-6 md:w-96 bg-white/90 backdrop-blur-xl border border-gray-100 p-4 rounded-3xl shadow-2xl z-[100] transform translate-y-[200%] transition-transform duration-700 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <img src="logo.png" alt="App Icon" class="w-12 h-12 object-contain bg-gray-50 rounded-xl p-1 border border-gray-100">
+            <div>
+                <h4 class="font-black text-brand-dark text-sm">تطبيق دار الفتح</h4>
+                <p class="text-[10px] text-gray-500 font-bold mt-0.5">تسوق أسرع، عروض حصرية!</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="hideInstallPrompt()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-full transition"><i class="fas fa-times"></i></button>
+            <button id="pwa-install-btn" class="bg-gradient-to-r from-brand-dark to-brand-light text-white px-4 py-2.5 rounded-xl text-xs font-black shadow-md hover:shadow-lg transform hover:-translate-y-1 transition flex items-center gap-1">
+                تثبيت <i class="fas fa-download"></i>
+            </button>
+        </div>
+    </div>
+</body>
+</html>
