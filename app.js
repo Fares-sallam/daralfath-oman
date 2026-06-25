@@ -460,7 +460,7 @@ function openCart() {
     if (cart.length === 0) {
         container.innerHTML = '<div class="text-center py-16 text-gray-400"><div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100"><i class="fas fa-shopping-basket text-5xl text-gray-200"></i></div><p class="font-bold text-lg text-brand-dark">سلتك فارغة حالياً</p><p class="text-sm mt-2">تصفح المتجر وأضف بعض الكتب الرائعة!</p></div>';
         document.getElementById('cart-summary-container').innerHTML = ''; 
-        promoContainer.innerHTML = `<div class="bg-blue-50 border border-blue-200 text-brand-dark p-3 rounded-xl text-sm font-bold text-center leading-relaxed"><i class="fas fa-gift text-brand-light mr-1 text-lg"></i> عرض خاص:<br> احصل على خصم 20% عند وصول مشترياتك إلى 20 ريال عماني أو أكثر!</div>`;
+        promoContainer.innerHTML = `<div class="bg-blue-50 border border-blue-200 text-brand-dark p-3 rounded-xl text-sm font-bold text-center leading-relaxed"><i class="fas fa-gift text-brand-light mr-1 text-lg"></i> عرض خاص:<br> احصل على خصم 10% عند وصول مشترياتك إلى 20 ريال عماني أو أكثر!</div>`;
     } else {
         cart.forEach((item) => {
             total += (item.cartPrice * item.qty); totalQty += item.qty;
@@ -485,9 +485,9 @@ function openCart() {
         // رسائل التنبيه العلوية في السلة بناءً على حالة الكوبون
         if (total < 20 && !appliedCoupon) {
             let needed = (20 - total).toFixed(2);
-            promoContainer.innerHTML = `<div class="bg-blue-50 border border-blue-200 text-brand-dark p-3 rounded-xl text-sm font-bold flex flex-col gap-2 shadow-sm"><span class="flex items-center gap-2"><i class="fas fa-bullhorn text-brand-light text-xl"></i> باقي ${needed} ر.ع. لخصم 20%</span></div>`;
+            promoContainer.innerHTML = `<div class="bg-blue-50 border border-blue-200 text-brand-dark p-3 rounded-xl text-sm font-bold flex flex-col gap-2 shadow-sm"><span class="flex items-center gap-2"><i class="fas fa-bullhorn text-brand-light text-xl"></i> باقي ${needed} ر.ع. لخصم 10%</span></div>`;
         } else if (!appliedCoupon) {
-            promoContainer.innerHTML = `<div class="bg-green-50 border border-green-200 text-green-700 p-3 rounded-xl text-sm font-bold shadow-sm flex items-center gap-2"><i class="fas fa-check-circle text-2xl"></i> مبروك! لقد حصلت على خصم 20% التلقائي</div>`;
+            promoContainer.innerHTML = `<div class="bg-green-50 border border-green-200 text-green-700 p-3 rounded-xl text-sm font-bold shadow-sm flex items-center gap-2"><i class="fas fa-check-circle text-2xl"></i> مبروك! لقد حصلت على خصم 10% التلقائي</div>`;
         } else {
             promoContainer.innerHTML = `<div class="bg-gradient-to-r from-brand-dark to-brand-light text-white p-3 rounded-xl text-sm font-bold shadow-sm flex items-center justify-between gap-2"><span class="flex items-center gap-2"><i class="fas fa-ticket-alt text-2xl text-yellow-300"></i> تم تفعيل كوبون (${appliedCoupon.code})</span> <button onclick="document.getElementById('coupon-input').value=''; applyCoupon();" class="bg-white/20 hover:bg-white/30 text-white rounded-full w-6 h-6 flex items-center justify-center"><i class="fas fa-times"></i></button></div>`;
         }
@@ -506,8 +506,8 @@ function openCart() {
             }
         } else if (total >= 20) {
             // الخصم التلقائي لا يظهر إلا في حالة عدم وجود أي كوبون مطبق
-            finalDiscountValue = total * 0.20;
-            discountText = `🎁 خصم تلقائي (20%):`;
+            finalDiscountValue = total * 0.10;
+            discountText = `🎁 خصم تلقائي (10%):`;
         }
 
         let finalTotal = total - finalDiscountValue;
@@ -613,8 +613,8 @@ function checkoutWhatsApp() {
         }
         discountMsg = `🎟️ *كوبون خصم (${appliedCoupon.code}):* - ${finalDiscountValue.toFixed(2)} ر.ع.\n`;
     } else if (total >= 20) {
-        finalDiscountValue = total * 0.20;
-        discountMsg = `🎁 *خصم تلقائي (20%):* - ${finalDiscountValue.toFixed(2)} ر.ع.\n`;
+        finalDiscountValue = total * 0.10;
+        discountMsg = `🎁 *خصم تلقائي (10%):* - ${finalDiscountValue.toFixed(2)} ر.ع.\n`;
     }
 
     let finalTotal = total - finalDiscountValue;
