@@ -645,79 +645,150 @@ function scrollSlider(id, dir) {
 }
 
 // ==========================================
-// 🔍 دالة قراءة الإكسيل المطورة (تتجاوز أخطاء الإكسيل)
+// 🗄️ نظام الكاش + التحميل الذكي
 // ==========================================
-async function loadGoogleSheetsData() {
+const _DB_CACHE_KEY = 'daralfath_db_v2';
+
+function _loadCache() {
     try {
-        const prodRes = await fetch(PRODUCTS_SHEET_URL);
-        const prodCSV = await prodRes.text();
+        const c = JSON.parse(localStorage.getItem(_DB_CACHE_KEY) || 'null');
+        return (c && c.products && c.products.length > 0) ? c : null;
+    } catch { return null; }
+}
+
+function _saveCache(products, cats, coupons) {
+    try {
+        localStorage.setItem(_DB_CACHE_KEY, JSON.stringify({ products, categories: cats, coupons, ts: Date.now() }));
+    } catch {}
+}
+
+function _parseRows(prodResults) {
+    const uniqueCategories = new Map();
+    const products = prodResults.data.map(row => {
+        if (!row.title) return null;
+        let sId = row.seriesId ? row.seriesId.trim() : 'general';
+        let sName = row.seriesName ? row.seriesName.trim() : 'إصدارات متنوعة';
+        uniqueCategories.set(sId, sName);
+        let availableStock = (row.stock !== undefined && row.stock.trim() !== '') ? parseInt(row.stock) : 1000;
+        let book = {
+            id: parseInt(row.id) || Math.floor(Math.random() * 10000),
+            seriesId: sId, seriesName: sName, title: row.title,
+            price: parseFloat(row.price) || parseFloat(row.Price) || 0,
+            desc: row.desc || '', images: row.images ? row.images.split(',').map(i => i.trim()) : [],
+            inStock: row.inStock ? row.inStock.toUpperCase() !== 'FALSE' : true,
+            stock: availableStock
+        };
+        if (book.stock <= 0) book.inStock = false;
+        let priceA4Val = parseFloat(row.priceA4);
+        if (row.priceA4 && row.priceA4.trim() !== '' && !isNaN(priceA4Val) && priceA4Val > 0) {
+            book.versions = [{ name: 'نسخة عادية', price: book.price }, { name: 'نسخة A4', price: priceA4Val }];
+        }
+        return book;
+    }).filter(Boolean);
+    return { products, categories: Array.from(uniqueCategories, ([id, name]) => ({ id, name })) };
+}
+
+async function _fetchWithTimeout(url, ms = 10000) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    try {
+        const res = await fetch(url, { signal: ctrl.signal });
+        clearTimeout(timer);
+        return await res.text();
+    } catch(e) {
+        clearTimeout(timer);
+        throw e;
+    }
+}
+
+async function loadGoogleSheetsData() {
+    // ── 1. كاش فوري: عرض البيانات المحفوظة فوراً ──
+    const cached = _loadCache();
+    if (cached) {
+        productsDB = cached.products;
+        categories = cached.categories;
+        couponsDB  = cached.coupons || {};
+        finishInit();
+        // تحديث صامت في الخلفية
+        setTimeout(() => _fetchAndCache(true), 1500);
+        return;
+    }
+
+    // ── 2. لا يوجد كاش → حمّل مع timeout ──────────
+    await _fetchAndCache(false);
+}
+
+async function _fetchAndCache(silent) {
+    try {
+        const prodCSV = await _fetchWithTimeout(PRODUCTS_SHEET_URL, 10000);
 
         Papa.parse(prodCSV, {
             header: true, skipEmptyLines: true,
             complete: async function(prodResults) {
-                const uniqueCategories = new Map();
-
-                productsDB = prodResults.data.map(row => {
-                    if(!row.title) return null; 
-                    let sId = row.seriesId ? row.seriesId.trim() : 'general';
-                    let sName = row.seriesName ? row.seriesName.trim() : 'إصدارات متنوعة';
-                    uniqueCategories.set(sId, sName);
-
-                    let availableStock = (row.stock !== undefined && row.stock.trim() !== '') ? parseInt(row.stock) : 1000;
-
-                    let book = {
-                        id: parseInt(row.id) || Math.floor(Math.random() * 10000),
-                        seriesId: sId, seriesName: sName, title: row.title,
-                        price: parseFloat(row.price) || parseFloat(row.Price) || 0,
-                        desc: row.desc || '', images: row.images ? row.images.split(',').map(i => i.trim()) : [],
-                        inStock: row.inStock ? row.inStock.toUpperCase() !== 'FALSE' : true,
-                        stock: availableStock 
-                    };
-
-                    if (book.stock <= 0) book.inStock = false;
-
-                    let priceA4Val = parseFloat(row.priceA4);
-                    if (row.priceA4 && row.priceA4.trim() !== '' && !isNaN(priceA4Val) && priceA4Val > 0) {
-                        book.versions = [{ name: 'نسخة عادية', price: book.price }, { name: 'نسخة A4', price: priceA4Val }];
-                    }
-                    
-                    return book;
-                }).filter(item => item !== null);
-
-                categories = Array.from(uniqueCategories, ([id, name]) => ({ id, name }));
+                const { products: newProducts, categories: newCategories } = _parseRows(prodResults);
+                let newCoupons = {};
 
                 if (COUPONS_SHEET_URL !== "") {
                     try {
-                        const coupRes = await fetch(COUPONS_SHEET_URL); const coupCSV = await coupRes.text();
-                        Papa.parse(coupCSV, {
-                            header: true, skipEmptyLines: true,
-                            complete: function(coupResults) {
-                                coupResults.data.forEach(row => {
-                                    // هنا السر في تخطي مشاكل الإكسيل: بننظف أسماء العواميد من أي مسافات
-                                    const cleanRow = {};
-                                    for(let key in row) {
-                                        cleanRow[key.trim().toLowerCase()] = row[key];
-                                    }
-
-                                    if (!cleanRow.code) return; 
-
-                                    let code = cleanRow.code.toString().trim().toUpperCase();
-                                    
-                                    couponsDB[code] = { 
-                                        type: cleanRow.type ? cleanRow.type.toString().trim().toLowerCase() : 'percentage',
-                                        value: parseFloat(cleanRow.value) || parseFloat(cleanRow.discount) || 0,
-                                        min_cart: parseFloat(cleanRow.min_cart) || 0,
-                                        isActive: cleanRow.active ? cleanRow.active.toString().toUpperCase() !== 'FALSE' : true 
-                                    };
-                                });
-                                finishInit();
-                            }
+                        const coupCSV = await _fetchWithTimeout(COUPONS_SHEET_URL, 8000);
+                        await new Promise(resolve => {
+                            Papa.parse(coupCSV, {
+                                header: true, skipEmptyLines: true,
+                                complete: function(coupResults) {
+                                    coupResults.data.forEach(row => {
+                                        const cleanRow = {};
+                                        for (let key in row) cleanRow[key.trim().toLowerCase()] = row[key];
+                                        if (!cleanRow.code) return;
+                                        let code = cleanRow.code.toString().trim().toUpperCase();
+                                        newCoupons[code] = {
+                                            type: cleanRow.type ? cleanRow.type.toString().trim().toLowerCase() : 'percentage',
+                                            value: parseFloat(cleanRow.value) || parseFloat(cleanRow.discount) || 0,
+                                            min_cart: parseFloat(cleanRow.min_cart) || 0,
+                                            isActive: cleanRow.active ? cleanRow.active.toString().toUpperCase() !== 'FALSE' : true
+                                        };
+                                    });
+                                    resolve();
+                                }
+                            });
                         });
-                    } catch(e) { console.log(e); finishInit(); }
-                } else { finishInit(); }
+                    } catch(e) { console.log('coupons fetch failed:', e); }
+                }
+
+                _saveCache(newProducts, newCategories, newCoupons);
+
+                productsDB = newProducts;
+                categories = newCategories;
+                couponsDB  = newCoupons;
+                if (!silent) finishInit();
             }
         });
-    } catch (error) { console.error("خطأ:", error); }
+    } catch (err) {
+        const isTimeout = err.name === 'AbortError';
+        console.error('خطأ في تحميل البيانات:', isTimeout ? 'انتهت مهلة الاتصال (10s)' : err);
+
+        if (!silent) {
+            // fallback للكاش القديم إن وُجد
+            const cached = _loadCache();
+            if (cached) {
+                productsDB = cached.products;
+                categories = cached.categories;
+                couponsDB  = cached.coupons || {};
+                finishInit();
+                return;
+            }
+            // لا كاش ولا اتصال → زر إعادة المحاولة
+            const grid = document.getElementById('all-products-grid');
+            if (grid) grid.innerHTML = `
+                <div class="col-span-2 md:col-span-4 lg:col-span-5 text-center py-16">
+                    <i class="fas fa-wifi text-6xl text-gray-200 block mb-4"></i>
+                    <p class="font-black text-lg text-gray-600 mb-1">تعذّر تحميل المنتجات</p>
+                    <p class="text-sm text-gray-400 mb-6">${isTimeout ? 'انتهت مهلة الاتصال. تحقق من الإنترنت.' : 'خطأ في الاتصال بالخادم.'}</p>
+                    <button onclick="loadGoogleSheetsData()" class="bg-brand-dark text-white px-8 py-3 rounded-2xl font-bold hover:bg-brand-light transition shadow-lg">
+                        <i class="fas fa-redo ml-2"></i> إعادة المحاولة
+                    </button>
+                </div>`;
+        }
+    }
 }
 
 function finishInit() {
