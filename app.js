@@ -1,6 +1,6 @@
-// 🌟 روابط قاعدة البيانات (جوجل شيت) 🌟
-const PRODUCTS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSd2RDC6AtTWCiTkXKthey8tc9joRmVh4Vv3h3qJTv3FXtQQywcKvW1acW3U-ShLJhl7LJe_UhX1a9b/pub?output=csv";
-const COUPONS_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSd2RDC6AtTWCiTkXKthey8tc9joRmVh4Vv3h3qJTv3FXtQQywcKvW1acW3U-ShLJhl7LJe_UhX1a9b/pub?gid=793714854&single=true&output=csv"; 
+// 🌟 روابط قاعدة البيانات (عبر وسيط Vercel بدلاً من الاتصال المباشر بجوجل — أسرع وأثبت لكل الزوار حول العالم) 🌟
+const PRODUCTS_SHEET_URL = "/api/sheet?type=products";
+const COUPONS_SHEET_URL = "/api/sheet?type=coupons";
 
 let productsDB = [];
 let categories = [];
