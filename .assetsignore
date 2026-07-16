@@ -1,0 +1,6 @@
+wrangler.toml
+_worker.js
+api/
+functions/
+.git
+.gitignore
