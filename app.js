@@ -13,6 +13,49 @@ let appliedCoupon = null;
 const baseTitle = "دار الفتح للنشر والتوزيع عمان";
 let wishlist = JSON.parse(localStorage.getItem('daralfath_wishlist')) || [];
 
+// ==========================================
+// 💱 نظام العملات (عرض فقط — الدفع دائماً بالريال العماني)
+// أسعار الصرف تقريبية وثابتة. عدّل قيمة "rate" لكل عملة عند تغيّر الأسعار.
+// rate = كم وحدة من العملة تساوي 1 ريال عماني.
+// ==========================================
+const CURRENCIES = {
+    OMR: { symbol: 'ر.ع.', rate: 1,    decimals: 3 },
+    SAR: { symbol: 'ر.س',  rate: 9.75, decimals: 2 },
+    AED: { symbol: 'د.إ',  rate: 9.55, decimals: 2 },
+    USD: { symbol: '$',    rate: 2.60, decimals: 2 },
+    EGP: { symbol: 'ج.م',  rate: 127,  decimals: 2 },
+};
+let activeCurrency = CURRENCIES[localStorage.getItem('daralfath_currency')] ? localStorage.getItem('daralfath_currency') : 'OMR';
+
+// يحوّل قيمة بالريال العماني إلى نص بالعملة المختارة (رقم + رمز)
+function formatPrice(omr) {
+    const c = CURRENCIES[activeCurrency] || CURRENCIES.OMR;
+    const val = (parseFloat(omr) || 0) * c.rate;
+    return `${val.toFixed(c.decimals)} <span class="text-xs font-bold text-gray-500">${c.symbol}</span>`;
+}
+
+// يلفّ السعر في عنصر يحمل قيمته الأصلية بالريال ليُحدّث فورياً عند تبديل العملة
+function priceTag(omr) {
+    return `<span class="price-tag" data-omr="${omr}">${formatPrice(omr)}</span>`;
+}
+
+// يعيد صياغة كل الأسعار الظاهرة على الشاشة بالعملة الجديدة دون إعادة تحميل
+function refreshPrices() {
+    document.querySelectorAll('[data-omr]').forEach(el => {
+        el.innerHTML = formatPrice(el.getAttribute('data-omr'));
+    });
+}
+
+function setCurrency(code) {
+    activeCurrency = CURRENCIES[code] ? code : 'OMR';
+    localStorage.setItem('daralfath_currency', activeCurrency);
+    refreshPrices();
+    if (typeof openCart === 'function' && document.getElementById('cart-drawer') &&
+        !document.getElementById('cart-drawer').classList.contains('-translate-x-full')) {
+        openCart();
+    }
+}
+
 function saveCartToMemory() { localStorage.setItem('daralfath_cart', JSON.stringify(cart)); }
 
 function showToast(message, type = 'success') {
@@ -294,7 +337,7 @@ function createBookCard(p) {
             <p class="text-[10px] text-brand-light font-bold mb-1 px-2 py-0.5 bg-blue-50 rounded-full truncate w-full">${p.seriesName}</p>
             <h3 class="text-sm md:text-base font-black text-gray-800 line-clamp-2 mb-2 hover:text-brand-light transition min-h-[40px]">${p.title}</h3>
             <div class="text-yellow-400 text-[10px] mb-2"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-            <p class="text-brand-dark font-black text-xl mb-4 mt-auto">${pricePrefix}${displayPrice} <span class="text-xs font-bold text-gray-500">ر.ع.</span></p>
+            <p class="text-brand-dark font-black text-xl mb-4 mt-auto">${pricePrefix}${priceTag(displayPrice)}</p>
             
             <div class="w-full action-container" onclick="event.stopPropagation()">${getActionHTML(p)}</div>
         </div>
@@ -308,12 +351,18 @@ function renderVersionsUI() {
             <button onclick="selectVersion(${idx})" class="px-5 py-2 border-2 rounded-xl font-bold text-sm transition hover:scale-105 active:scale-95 ${currentVersionIndex === idx ? 'border-brand-dark bg-brand-dark text-white shadow-md' : 'border-gray-200 text-gray-600 hover:border-brand-light'}">${v.name}</button>
         `).join('');
         container.classList.remove('hidden');
-        document.getElementById('modal-price').innerText = currentProduct.versions[currentVersionIndex].price + ' ر.ع.';
+        setModalPrice(currentProduct.versions[currentVersionIndex].price);
     } else {
         container.classList.add('hidden');
-        document.getElementById('modal-price').innerText = currentProduct.price + ' ر.ع.';
+        setModalPrice(currentProduct.price);
     }
     document.getElementById('modal-action-container').innerHTML = getModalActionHTML(currentProduct);
+}
+
+function setModalPrice(omr) {
+    const el = document.getElementById('modal-price');
+    el.setAttribute('data-omr', omr);
+    el.innerHTML = formatPrice(omr);
 }
 
 function selectVersion(idx) {
@@ -472,7 +521,7 @@ function openCart() {
                 </div>
                 <div class="flex-1 flex flex-col justify-between py-1">
                     <p class="font-bold text-gray-800 text-sm md:text-base leading-snug line-clamp-2 mb-1">${item.cartTitle}</p>
-                    <p class="text-brand-light font-black mb-3">${item.cartPrice} ر.ع.</p>
+                    <p class="text-brand-light font-black mb-3">${priceTag(item.cartPrice)}</p>
                     <div class="flex items-center gap-3 bg-gray-50 w-fit rounded-lg border border-gray-200 p-1">
                         <button onclick="updateCartQty('${item.cartKey}', -1)" class="w-7 h-7 bg-white rounded flex items-center justify-center hover:text-red-500 hover:shadow-sm transition text-gray-600"><i class="fas ${item.qty === 1 ? 'fa-trash text-sm' : 'fa-minus text-xs'}"></i></button>
                         <span class="font-bold text-brand-dark w-6 text-center text-sm">${item.qty}</span>
@@ -484,8 +533,8 @@ function openCart() {
 
         // رسائل التنبيه العلوية في السلة بناءً على حالة الكوبون
         if (total < 20 && !appliedCoupon) {
-            let needed = (20 - total).toFixed(2);
-            promoContainer.innerHTML = `<div class="bg-blue-50 border border-blue-200 text-brand-dark p-3 rounded-xl text-sm font-bold flex flex-col gap-2 shadow-sm"><span class="flex items-center gap-2"><i class="fas fa-bullhorn text-brand-light text-xl"></i> باقي ${needed} ر.ع. لخصم 10%</span></div>`;
+            let needed = (20 - total).toFixed(3);
+            promoContainer.innerHTML = `<div class="bg-blue-50 border border-blue-200 text-brand-dark p-3 rounded-xl text-sm font-bold flex flex-col gap-2 shadow-sm"><span class="flex items-center gap-2"><i class="fas fa-bullhorn text-brand-light text-xl"></i> باقي ${priceTag(needed)} لخصم 10%</span></div>`;
         } else if (!appliedCoupon) {
             promoContainer.innerHTML = `<div class="bg-green-50 border border-green-200 text-green-700 p-3 rounded-xl text-sm font-bold shadow-sm flex items-center gap-2"><i class="fas fa-check-circle text-2xl"></i> مبروك! لقد حصلت على خصم 10% التلقائي</div>`;
         } else {
@@ -512,11 +561,13 @@ function openCart() {
 
         let finalTotal = total - finalDiscountValue;
         const summaryContainer = document.getElementById('cart-summary-container');
-        let summaryHTML = `<div class="flex justify-between items-center text-sm font-bold text-gray-500 mb-2"><span>المجموع (${totalQty} كتب):</span><span>${total.toFixed(2)} ر.ع.</span></div>`;
-        
-        if (finalDiscountValue > 0) summaryHTML += `<div class="flex justify-between items-center text-sm font-bold text-green-600 mb-2 bg-green-50 p-2 rounded-lg border border-green-200"><span>${discountText}</span><span>- ${finalDiscountValue.toFixed(2)} ر.ع.</span></div>`;
-        
-        summaryHTML += `<div class="flex justify-between items-center text-lg font-black text-brand-dark border-t border-gray-100 pt-3 mt-2"><span>الإجمالي النهائي:</span><span>${finalTotal.toFixed(2)} ر.ع.</span></div>`;
+        let summaryHTML = `<div class="flex justify-between items-center text-sm font-bold text-gray-500 mb-2"><span>المجموع (${totalQty} كتب):</span><span>${priceTag(total)}</span></div>`;
+
+        if (finalDiscountValue > 0) summaryHTML += `<div class="flex justify-between items-center text-sm font-bold text-green-600 mb-2 bg-green-50 p-2 rounded-lg border border-green-200"><span>${discountText}</span><span>- ${priceTag(finalDiscountValue)}</span></div>`;
+
+        summaryHTML += `<div class="flex justify-between items-center text-lg font-black text-brand-dark border-t border-gray-100 pt-3 mt-2"><span>الإجمالي النهائي:</span><span>${priceTag(finalTotal)}</span></div>`;
+
+        if (activeCurrency !== 'OMR') summaryHTML += `<div class="mt-3 text-[11px] text-gray-400 font-bold text-center leading-relaxed"><i class="fas fa-info-circle ml-1"></i> الأسعار بالعملة المختارة تقريبية للعرض فقط، والدفع النهائي يتم بالريال العماني.</div>`;
         summaryContainer.innerHTML = summaryHTML;
 
         const codeInput = document.getElementById('coupon-input');
@@ -800,9 +851,12 @@ function finishInit() {
         categories.splice(categories.findIndex(c => c.id === 'hesab') + 1, 0, _eng);
     }
 
+    const _currencySelect = document.getElementById('currency-select');
+    if (_currencySelect) _currencySelect.value = activeCurrency;
+
     renderSmartFilters();
-    renderFathRabbaniSlider(); 
-    navigateTo('home-page'); 
+    renderFathRabbaniSlider();
+    navigateTo('home-page');
     
     document.querySelectorAll('.submenu').forEach(sub => {
         sub.style.display = 'none';
