@@ -14,16 +14,12 @@ const baseTitle = "دار الفتح للنشر والتوزيع عمان";
 let wishlist = JSON.parse(localStorage.getItem('daralfath_wishlist')) || [];
 
 // ==========================================
-// 💱 نظام العملات (عرض فقط — الدفع دائماً بالريال العماني)
-// أسعار الصرف تقريبية وثابتة. عدّل قيمة "rate" لكل عملة عند تغيّر الأسعار.
+// 💱 نظام العملات (عرض فقط — سعر الصرف بتاريخ 2026-07-17 من جوجل)
 // rate = كم وحدة من العملة تساوي 1 ريال عماني.
 // ==========================================
 const CURRENCIES = {
-    OMR: { symbol: 'ر.ع.', rate: 1,    decimals: 3 },
-    SAR: { symbol: 'ر.س',  rate: 9.75, decimals: 2 },
-    AED: { symbol: 'د.إ',  rate: 9.55, decimals: 2 },
-    USD: { symbol: '$',    rate: 2.60, decimals: 2 },
-    EGP: { symbol: 'ج.م',  rate: 127,  decimals: 2 },
+    OMR: { symbol: 'ر.ع.', rate: 1,      decimals: 3 },
+    AED: { symbol: 'د.إ',  rate: 9.5514, decimals: 2 },
 };
 let activeCurrency = CURRENCIES[localStorage.getItem('daralfath_currency')] ? localStorage.getItem('daralfath_currency') : 'OMR';
 
@@ -37,6 +33,13 @@ function formatPrice(omr) {
 // يلفّ السعر في عنصر يحمل قيمته الأصلية بالريال ليُحدّث فورياً عند تبديل العملة
 function priceTag(omr) {
     return `<span class="price-tag" data-omr="${omr}">${formatPrice(omr)}</span>`;
+}
+
+// نص عادي (بدون HTML) بالعملة المختارة — يُستخدم في رسائل واتساب
+function formatPriceText(omr) {
+    const c = CURRENCIES[activeCurrency] || CURRENCIES.OMR;
+    const val = (parseFloat(omr) || 0) * c.rate;
+    return `${val.toFixed(c.decimals)} ${c.symbol}`;
 }
 
 // يعيد صياغة كل الأسعار الظاهرة على الشاشة بالعملة الجديدة دون إعادة تحميل
@@ -646,13 +649,13 @@ function checkoutWhatsApp() {
     let message = `*✨ طلب جديد من متجر دار الفتح ✨*\n━━━━━━━━━━━━━━━━━\n👤 *العميل:* ${name}\n📱 *الهاتف:* ${phone}\n📍 *العنوان:* ${address}\n━━━━━━━━━━━━━━━━━\n*📚 تفاصيل الطلب:*\n\n`;
     
     let total = 0;
-    cart.forEach((item) => { 
-        const itemTotal = item.cartPrice * item.qty; 
-        message += `▪️ *${item.cartTitle}*\n   (العدد: ${item.qty} × ${item.cartPrice} = ${itemTotal.toFixed(2)} ر.ع.)\n`; 
-        total += itemTotal; 
+    cart.forEach((item) => {
+        const itemTotal = item.cartPrice * item.qty;
+        message += `▪️ *${item.cartTitle}*\n   (العدد: ${item.qty} × ${formatPriceText(item.cartPrice)} = ${formatPriceText(itemTotal)})\n`;
+        total += itemTotal;
     });
 
-    let finalDiscountValue = 0; 
+    let finalDiscountValue = 0;
     let discountMsg = "";
 
     // نفس التعديل لرسالة الواتساب: الأولوية المطلقة للكوبون بدون مقارنة
@@ -662,17 +665,19 @@ function checkoutWhatsApp() {
         } else {
             finalDiscountValue = appliedCoupon.value;
         }
-        discountMsg = `🎟️ *كوبون خصم (${appliedCoupon.code}):* - ${finalDiscountValue.toFixed(2)} ر.ع.\n`;
+        discountMsg = `🎟️ *كوبون خصم (${appliedCoupon.code}):* - ${formatPriceText(finalDiscountValue)}\n`;
     } else if (total >= 20) {
         finalDiscountValue = total * 0.10;
-        discountMsg = `🎁 *خصم تلقائي (10%):* - ${finalDiscountValue.toFixed(2)} ر.ع.\n`;
+        discountMsg = `🎁 *خصم تلقائي (10%):* - ${formatPriceText(finalDiscountValue)}\n`;
     }
 
     let finalTotal = total - finalDiscountValue;
 
-    message += `━━━━━━━━━━━━━━━━━\n🔖 *المجموع:* ${total.toFixed(2)} ر.ع.\n`;
+    message += `━━━━━━━━━━━━━━━━━\n🔖 *المجموع:* ${formatPriceText(total)}\n`;
     if (finalDiscountValue > 0) message += discountMsg;
-    message += `💰 *الإجمالي النهائي: ${finalTotal.toFixed(2)} ر.ع.*\n━━━━━━━━━━━━━━━━━\nشكراً لاختياركم دار الفتح للنشر والتوزيع عمان 🤍`;
+    message += `💰 *الإجمالي النهائي: ${formatPriceText(finalTotal)}*\n`;
+    if (activeCurrency !== 'OMR') message += `_(الأسعار معروضة بـ ${CURRENCIES[activeCurrency].symbol} للتقريب فقط، والدفع الفعلي بالريال العماني)_\n`;
+    message += `━━━━━━━━━━━━━━━━━\nشكراً لاختياركم دار الفتح للنشر والتوزيع عمان 🤍`;
     
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
 
